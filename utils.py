@@ -71,3 +71,30 @@ def sparse_randomized(x,input_compress_settings={}):
 
     #out=out.reshape(x.shape)
     return out
+
+def one_bit(x,input_compress_settings={}):
+    
+    x_norm=torch.norm(x,p=float('inf'))
+    sgn_x=((x>0).float()-0.5)*2
+    
+    compressed_x=x_norm*sgn_x
+    
+    return compressed_x
+
+
+
+def sparse_top_k(x,input_compress_settings={}):
+    compress_settings={'k':1/32}
+    compress_settings.update(input_compress_settings)
+    k=compress_settings['k']
+    vec_x=x.flatten()
+    d = int(len(vec_x))
+    #print(d)
+    k =int(np.ceil(d*k))
+    #print(k)
+    indices = torch.abs(vec_x).topk(k)[1]
+    out_x = torch.zeros_like(vec_x)
+    out_x[indices] = vec_x[indices]
+    out_x=out_x.reshape(x.shape)
+    #print(x.shape)
+    return out_x
